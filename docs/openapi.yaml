@@ -1,0 +1,45 @@
+openapi: 3.0.3
+info:
+  title: CarePulse API
+  version: 1.0.0
+servers:
+  - url: /api/v1
+paths:
+  /health:
+    get:
+      responses:
+        "200": {description: Healthy}
+  /auth/register:
+    post:
+      responses:
+        "201": {description: Created}
+  /auth/login:
+    post:
+      responses:
+        "200": {description: Authenticated}
+  /doctors:
+    get:
+      responses:
+        "200": {description: Doctor list}
+  /appointments:
+    get:
+      responses:
+        "200": {description: Appointment list}
+    post:
+      responses:
+        "201": {description: Created}
+        "409": {description: Slot conflict}
+  /ai/triage:
+    post:
+      responses:
+        "200": {description: Triage suggestion}
+  /ai/generate/stream:
+    post:
+      responses:
+        "200": {description: Server-Sent Events stream}
+  /prescriptions/verify/{code}:
+    get:
+      parameters:
+        - {name: code, in: path, required: true, schema: {type: string}}
+      responses:
+        "200": {description: Verified}

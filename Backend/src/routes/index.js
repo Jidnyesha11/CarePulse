@@ -1,0 +1,25 @@
+import {Router} from "express";
+import {asyncHandler} from "../utils/http.js";
+import {requireAuth,requireRole} from "../middleware/auth.js";
+import {authLimiter,aiLimiter} from "../middleware/rateLimiters.js";
+import * as auth from "../controllers/authController.js";
+import * as doctors from "../controllers/doctorController.js";
+import * as appointments from "../controllers/appointmentController.js";
+import * as records from "../controllers/recordController.js";
+import * as prescriptions from "../controllers/prescriptionController.js";
+import * as billing from "../controllers/billingController.js";
+import * as beds from "../controllers/bedController.js";
+import * as ai from "../controllers/aiController.js";
+import * as admin from "../controllers/adminController.js";
+
+const r=Router();
+r.post("/auth/register",authLimiter,asyncHandler(auth.register));r.post("/auth/login",authLimiter,asyncHandler(auth.login));r.post("/auth/refresh",asyncHandler(auth.refresh));r.post("/auth/logout",asyncHandler(auth.logout));r.get("/auth/me",requireAuth,asyncHandler(auth.me));
+r.get("/doctors",requireAuth,asyncHandler(doctors.listDoctors));r.get("/doctors/:doctorId/availability",requireAuth,asyncHandler(doctors.availability));
+r.get("/appointments",requireAuth,asyncHandler(appointments.list));r.post("/appointments",requireAuth,requireRole("patient"),asyncHandler(appointments.create));r.patch("/appointments/:id/status",requireAuth,requireRole("doctor","admin"),asyncHandler(appointments.status));r.post("/appointments/:id/cancel",requireAuth,asyncHandler(appointments.cancel));
+r.get("/records/:patientId",requireAuth,asyncHandler(records.list));r.post("/records",requireAuth,requireRole("doctor","admin"),asyncHandler(records.create));
+r.get("/prescriptions/verify/:code",asyncHandler(prescriptions.verify));r.get("/prescriptions",requireAuth,asyncHandler(prescriptions.list));r.post("/prescriptions",requireAuth,requireRole("doctor","admin"),asyncHandler(prescriptions.create));
+r.get("/bills",requireAuth,asyncHandler(billing.list));r.post("/bills",requireAuth,requireRole("admin"),asyncHandler(billing.create));r.post("/bills/:id/pay",requireAuth,requireRole("patient","admin"),asyncHandler(billing.pay));
+r.get("/beds",requireAuth,asyncHandler(beds.list));r.patch("/beds/:id",requireAuth,requireRole("admin"),asyncHandler(beds.update));
+r.post("/ai/triage",requireAuth,requireRole("patient","doctor","admin"),aiLimiter,asyncHandler(ai.triage));r.post("/ai/generate/stream",requireAuth,requireRole("patient","doctor","admin"),aiLimiter,asyncHandler(ai.stream));
+r.get("/admin/analytics",requireAuth,requireRole("admin"),asyncHandler(admin.analytics));r.get("/admin/users",requireAuth,requireRole("admin"),asyncHandler(admin.users));r.patch("/admin/users/:id/status",requireAuth,requireRole("admin"),asyncHandler(admin.status));r.patch("/admin/users/:id/role",requireAuth,requireRole("admin"),asyncHandler(admin.role));r.get("/admin/doctors",requireAuth,requireRole("admin"),asyncHandler(admin.doctors));r.get("/admin/audit-logs",requireAuth,requireRole("admin"),asyncHandler(admin.audit));
+export default r;
