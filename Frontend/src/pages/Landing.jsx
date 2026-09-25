@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, CalendarDays, ShieldCheck, Sparkles, Activity, Clock3, HeartPulse } from "lucide-react";
-
+import Footer from "../components/Footer";
 export default function Landing() {
   return <div className="landing">
     <nav className="landing-nav">
@@ -20,7 +20,7 @@ export default function Landing() {
         <div className="orb orb-one"/><div className="orb orb-two"/>
         <div className="dashboard-preview">
           <div className="preview-top"><span className="mini-brand">CarePulse</span><span className="mini-status">● Live</span></div>
-          <div className="preview-title">Good morning, Aarav</div>
+          <div className="preview-title">Good morning, </div>
           <div className="preview-sub">Here’s what needs your attention today.</div>
           <div className="preview-stats"><div><small>Next visit</small><b>10:30 AM</b><span>Dr. Maya Sharma</span></div><div><small>Outstanding</small><b>₹1,240</b><span>2 invoices</span></div></div>
           <div className="preview-card"><div className="preview-icon"><CalendarDays size={17}/></div><div><b>Cardiology consultation</b><span>Today · 10:30 AM · Room 204</span></div><span className="confirmed">Confirmed</span></div>
@@ -39,7 +39,7 @@ export default function Landing() {
     </section>
     <section id="workflow" className="workflow-section"><div><div className="section-kicker">A CALMER WORKFLOW</div><h2>From booking to billing,<br/>everything stays connected.</h2></div><div className="workflow-steps"><Step n="01" t="Discover" d="Find the right doctor and live slot."/><Step n="02" t="Coordinate" d="Book and manage appointments in real time."/><Step n="03" t="Care" d="Keep records and prescriptions together."/><Step n="04" t="Close the loop" d="Track invoices and operational insights."/></div></section>
     <section id="security" className="security-banner"><ShieldCheck/><div><b>Built for sensitive workflows.</b><span>JWT authentication, API-level RBAC, audit logging and server-side AI credentials form the security baseline.</span></div></section>
-    <footer>CarePulse · Hospital Management System · Portfolio / capstone platform</footer>
+    <Footer/>
   </div>
 }
 function Feature({icon,title,text}){return <article className="feature-card"><div className="feature-icon">{icon}</div><h3>{title}</h3><p>{text}</p></article>}

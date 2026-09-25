@@ -1,18 +1,14 @@
 services:
   - type: web
-    name: carepulse-api
+    name: hms-api
     runtime: node
     rootDir: Backend
-    buildCommand: npm install
+    buildCommand: npm ci
     startCommand: npm start
     envVars:
-      - key: NODE_ENV
-        value: production
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
-        sync: false
-      - key: REFRESH_TOKEN_SECRET
         sync: false
       - key: CLIENT_URL
         sync: false
@@ -21,6 +17,15 @@ services:
       - key: OPENAI_BASE_URL
         value: https://api.openai.com/v1
       - key: OPENAI_MODEL
-        value: gpt-4o-mini
-      - key: OPENAI_TRIAGE_MODEL
-        value: gpt-4o-mini
+        value: gpt-4.1-mini
+  - type: web
+    name: hms-web
+    runtime: static
+    rootDir: Frontend
+    buildCommand: npm ci && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        sync: false
+      - key: VITE_SOCKET_URL
+        sync: false

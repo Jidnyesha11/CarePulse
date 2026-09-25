@@ -1,0 +1,1 @@
+const jwt=require("jsonwebtoken");exports.token=u=>jwt.sign({id:u._id,role:u.role},process.env.JWT_SECRET,{expiresIn:process.env.JWT_EXPIRES_IN||"7d"});exports.pub=u=>({id:u._id,name:u.name,email:u.email,role:u.role,phone:u.phone,language:u.language});exports.async=f=>(q,s,n)=>Promise.resolve(f(q,s,n)).catch(n);

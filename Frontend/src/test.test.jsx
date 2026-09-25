@@ -1,0 +1,1 @@
+import{describe,it,expect}from"vitest";describe("HMS frontend",()=>it("test runner works",()=>expect(2+2).toBe(4)));

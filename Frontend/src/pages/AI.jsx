@@ -1,5 +1,475 @@
-import{useState}from"react";import{api}from"../api";import{Sparkles,ShieldAlert}from"lucide-react";
-export default function AI(){const[symptoms,setSymptoms]=useState(""),[triage,setTriage]=useState(null),[prompt,setPrompt]=useState(""),[out,setOut]=useState(""),[busy,setBusy]=useState(false);
-async function run(){setBusy(true);try{setTriage((await api.post("/ai/triage",{symptoms})).data.data)}finally{setBusy(false)}}
-async function stream(){setOut("");setBusy(true);const token=localStorage.getItem("carepulse_access_token"),base=import.meta.env.VITE_API_URL||"http://localhost:5000/api/v1";const r=await fetch(`${base}/ai/generate/stream`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({prompt,type:"hospital-administrative"})});const reader=r.body.getReader(),dec=new TextDecoder();let buf="";while(true){const{value,done}=await reader.read();if(done)break;buf+=dec.decode(value,{stream:true});const parts=buf.split("\n\n");buf=parts.pop()||"";for(const part of parts){const line=part.split("\n").find(x=>x.startsWith("data: "));if(!line)continue;const d=JSON.parse(line.slice(6));if(d.text)setOut(x=>x+d.text)}}setBusy(false)}
-return <><div className="title"><div><small>INTELLIGENCE LAYER</small><h2>CarePulse AI</h2></div></div><div className="grid"><div className="card"><div className="card-head"><h3>AI symptom triage</h3><Sparkles/></div><p className="muted">Suggests a department and urgency tier before booking.</p><textarea value={symptoms} onChange={e=>setSymptoms(e.target.value)} placeholder="Describe symptoms…"/><button className="primary" disabled={!symptoms||busy} onClick={run}>Analyze</button>{triage&&<div className="triage"><b>{triage.department}</b><strong>{triage.urgency}</strong><small>Confidence {Math.round(triage.confidence*100)}%</small><p>{triage.disclaimer}</p></div>}</div><div className="card"><div className="card-head"><h3>Streaming assistant</h3><ShieldAlert/></div><p className="muted">Real OpenAI-compatible streaming through the backend.</p><textarea value={prompt} onChange={e=>setPrompt(e.target.value)} placeholder="Ask for a patient-friendly administrative explanation…"/><button className="primary" disabled={!prompt||busy} onClick={stream}>{busy?"Working…":"Generate"}</button>{out&&<pre className="stream">{out}</pre>}</div></div></>}
+import { useState } from "react";
+import {
+  Brain,
+  Sparkles,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
+import api from "../api";
+
+export default function AI() {
+  // -------------------------
+  // TRIAGE
+  // -------------------------
+
+  const [symptoms, setSymptoms] = useState("");
+  const [triageResult, setTriageResult] = useState(null);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  // -------------------------
+  // GENERATOR
+  // -------------------------
+
+  const [prompt, setPrompt] = useState("");
+  const [generatedText, setGeneratedText] = useState("");
+  const [generating, setGenerating] = useState(false);
+
+  const [error, setError] = useState("");
+
+  const handleAnalyze = async (event) => {
+    event.preventDefault();
+
+    if (!symptoms.trim()) {
+      setError("Please enter symptoms first.");
+      return;
+    }
+
+    try {
+      setError("");
+      setAnalyzing(true);
+      setTriageResult(null);
+
+      const response = await api.post("/ai/triage", {
+        symptoms: symptoms.trim(),
+      });
+
+      setTriageResult(
+        response.data?.data || response.data
+      );
+    } catch (error) {
+      console.error("Triage error:", error);
+
+      setError(
+        error?.response?.data?.message ||
+          "AI triage is temporarily unavailable."
+      );
+    } finally {
+      setAnalyzing(false);
+    }
+  };
+
+  const handleGenerate = async (event) => {
+  event.preventDefault();
+
+  if (!prompt.trim()) {
+    setError("Please enter a prompt first.");
+    return;
+  }
+
+  try {
+    setError("");
+    setGeneratedText("");
+    setGenerating(true);
+
+    const token = localStorage.getItem("accessToken");
+
+    const response = await fetch(
+      "http://localhost:5000/api/v1/ai/generate/stream",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token
+            ? {
+                Authorization: `Bearer ${token}`,
+              }
+            : {}),
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          prompt: prompt.trim(),
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      const text = await response.text();
+
+      throw new Error(
+        text || `Request failed with ${response.status}`
+      );
+    }
+
+    if (!response.body) {
+      throw new Error("AI stream is not available.");
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    let result = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+
+      if (done) break;
+
+      const chunk = decoder.decode(value, {
+        stream: true,
+      });
+
+      result += chunk;
+
+      // Handle SSE data lines
+      const lines = chunk.split("\n");
+
+      for (const line of lines) {
+        if (line.startsWith("data:")) {
+          const data = line
+            .replace(/^data:\s*/, "")
+            .trim();
+
+          if (!data || data === "[DONE]") {
+            continue;
+          }
+
+          try {
+            const parsed = JSON.parse(data);
+
+            const text =
+              parsed.text ||
+              parsed.content ||
+              parsed.delta ||
+              "";
+
+            if (text) {
+              setGeneratedText((previous) => previous + text);
+            }
+          } catch {
+            // Some servers send plain text chunks.
+            setGeneratedText(
+              (previous) => previous + data
+            );
+          }
+        }
+      }
+    }
+
+    // Fallback if the backend returned plain text
+    if (!result.includes("data:") && result.trim()) {
+      setGeneratedText(result);
+    }
+  } catch (error) {
+    console.error("Generate error:", error);
+
+    setError(
+      error?.message ||
+        "AI generation is temporarily unavailable."
+    );
+  } finally {
+    setGenerating(false);
+  }
+};
+
+  const confidence = Number(
+    triageResult?.confidence
+  );
+
+  return (
+    <div className="page-container">
+
+      <div className="page-header">
+        <div>
+          <p className="eyebrow">
+            CarePulse Intelligence
+          </p>
+
+          <h1>AI Assistant</h1>
+
+          <p className="page-subtitle">
+            AI-powered clinical assistance for
+            symptom triage and healthcare content.
+          </p>
+        </div>
+      </div>
+
+      {error && (
+        <div className="alert alert-error">
+          <AlertTriangle size={18} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      {/* =========================
+          TRIAGE
+      ========================== */}
+
+      <section className="card">
+
+        <div className="card-header">
+          <div>
+            <h2>
+              <Brain size={20} />
+              AI Symptom Triage
+            </h2>
+
+            <p>
+              Get informational guidance about
+              symptoms before booking an appointment.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handleAnalyze}>
+
+          <div className="form-group">
+
+            <label>
+              Symptoms
+            </label>
+
+            <textarea
+              value={symptoms}
+              onChange={(event) =>
+                setSymptoms(event.target.value)
+              }
+              placeholder="Describe the patient's symptoms..."
+              rows={5}
+            />
+
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={analyzing}
+          >
+            {analyzing ? (
+              <>
+                <Loader2
+                  size={17}
+                  className="spin"
+                />
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <Brain size={17} />
+                Analyze
+              </>
+            )}
+          </button>
+
+        </form>
+
+        {triageResult && (
+          <div className="ai-result">
+
+            <div className="result-header">
+
+              <div>
+                <h3>
+                  Triage Assessment
+                </h3>
+
+                <p>
+                  {triageResult.summary}
+                </p>
+              </div>
+
+              <span
+                className={`status-badge status-${String(
+                  triageResult.urgency || "medium"
+                ).toLowerCase()}`}
+              >
+                {triageResult.urgency || "medium"}
+              </span>
+
+            </div>
+
+            <div className="ai-result-grid">
+
+              <div>
+                <strong>
+                  Confidence
+                </strong>
+
+                <span>
+                  {Number.isFinite(confidence)
+                    ? `${Math.round(confidence)}%`
+                    : "Not available"}
+                </span>
+              </div>
+
+              <div>
+                <strong>
+                  Suggested Department
+                </strong>
+
+                <span>
+                  {triageResult.department ||
+                    "General Medicine"}
+                </span>
+              </div>
+
+            </div>
+
+            {triageResult.possibleConditions?.length >
+              0 && (
+              <div className="result-section">
+
+                <h4>
+                  Possible Conditions
+                </h4>
+
+                <ul>
+                  {triageResult.possibleConditions.map(
+                    (item, index) => (
+                      <li key={index}>
+                        {item}
+                      </li>
+                    )
+                  )}
+                </ul>
+
+              </div>
+            )}
+
+            {triageResult.recommendedActions?.length >
+              0 && (
+              <div className="result-section">
+
+                <h4>
+                  Recommended Actions
+                </h4>
+
+                <ul>
+                  {triageResult.recommendedActions.map(
+                    (item, index) => (
+                      <li key={index}>
+                        {item}
+                      </li>
+                    )
+                  )}
+                </ul>
+
+              </div>
+            )}
+
+            {triageResult.redFlags?.length >
+              0 && (
+              <div className="result-section">
+
+                <h4>
+                  Red Flags
+                </h4>
+
+                <ul>
+                  {triageResult.redFlags.map(
+                    (item, index) => (
+                      <li key={index}>
+                        {item}
+                      </li>
+                    )
+                  )}
+                </ul>
+
+              </div>
+            )}
+
+            <p className="ai-disclaimer">
+              {triageResult.disclaimer ||
+                "This is informational guidance and not a medical diagnosis."}
+            </p>
+
+          </div>
+        )}
+
+      </section>
+
+      {/* =========================
+          GENERATOR
+      ========================== */}
+
+      <section className="card">
+
+        <div className="card-header">
+
+          <div>
+            <h2>
+              <Sparkles size={20} />
+              Streaming Assistant
+            </h2>
+
+            <p>
+              Ask for patient-friendly healthcare
+              administration content, clinical summaries, or
+              educational materials.
+            </p>
+          </div>
+
+        </div>
+
+        <form onSubmit={handleGenerate}>
+
+          <div className="form-group">
+
+            <label>
+              Prompt
+            </label>
+
+            <textarea
+              value={prompt}
+              onChange={(event) =>
+                setPrompt(event.target.value)
+              }
+              placeholder="Example: Explain hypertension in simple language for a patient."
+              rows={5}
+            />
+
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={generating}
+          >
+            {generating ? (
+              <>
+                <Loader2
+                  size={17}
+                  className="spin"
+                />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Sparkles size={17} />
+                Generate
+              </>
+            )}
+          </button>
+
+        </form>
+
+        {generatedText && (
+          <div className="ai-result">
+
+            <div className="result-header">
+              <h3>
+                Generated Content
+              </h3>
+            </div>
+
+            <div className="generated-content">
+              {generatedText}
+            </div>
+
+          </div>
+        )}
+
+      </section>
+
+    </div>
+  );
+}
