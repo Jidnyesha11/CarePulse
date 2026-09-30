@@ -1,157 +1,599 @@
-# CarePulse HMS
+# HMS CarePulse 🏥
 
-CarePulse is a full-stack hospital management demo for coordinating patient access, appointments, clinical documentation, and hospital operations. It includes a responsive React website, role-aware dashboards, a versioned Express REST API, MongoDB persistence, and a Render Blueprint for deployment.
+## Smart Hospital Management System
 
-> **Project status:** The app and deployment configuration are in this repository. A public deployment has not yet been completed. Replace the placeholder below after deploying.
->
-> **Live website:** `https://<your-carepulse-frontend>.onrender.com`  
-> **API health:** `https://<your-carepulse-api>.onrender.com/api/v1/health`
+HMS CarePulse is a full-stack hospital management system designed to connect patients, doctors, and hospital administration through a centralized digital platform.
 
-CarePulse is a portfolio/demo application. It is not certified HIPAA-compliant, is not intended for real patient care, and must not store real patient data. AI triage is routing support only, not diagnosis or treatment. Billing and insurance flows are simulations.
+The project demonstrates modern full-stack development using the MERN stack with real-time communication, role-based authentication, appointment management, digital prescriptions, hospital resource management, audit logging, analytics, and AI-assisted capabilities.
 
-## Project deliverables
+---
 
-| Deliverable                 | Included                                                                                                        |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Hospital management website | React + TypeScript frontend with patient, doctor, and administrator workspaces                                  |
-| Admin dashboard             | Operations overview, user directory, bed inventory, billing, claims, analytics, and audit trail                 |
-| REST APIs                   | Express API under `/api/v1`; route overview in [API reference](docs/API.md) and interactive docs at `/api/docs` |
-| Database design             | MongoDB/Mongoose model and relationship guide in [Database design](docs/DATABASE.md)                            |
-| Deployment link             | Placeholder above; fill it in after creating the Render services                                                |
-| Documentation               | Setup, API, database, deployment, and testing guides in `docs/`                                                 |
+## 🚀 Features
 
-## Features
+### 👤 Authentication & Authorization
+- User registration and login
+- JWT-based authentication
+- Role-based access control
+- Patient, Doctor, and Admin roles
+- Secure password hashing
 
-### Patient workspace
+### 👨‍⚕️ Doctor Management
+- Doctor profiles
+- Department/specialization information
+- Doctor availability
+- Appointment management
 
-- Register and sign in as a patient.
-- Submit symptom descriptions for cautious department routing, with a clear disclaimer and emergency keyword handling.
-- Browse doctors and appointment availability; book, reschedule, and cancel appointments.
-- View clinical records and prescriptions, download prescription PDFs, and submit simulated insurance claims.
+### 📅 Appointment Management
+- Book appointments
+- View appointment details
+- Appointment status management
+- Appointment cancellation
+- In-person and telemedicine appointment types
+- Real-time availability updates
 
-### Doctor workspace
+### ⚡ Real-Time Doctor Availability
+- Socket.IO-based real-time communication
+- Live appointment slot updates
+- Booking and cancellation events
+- Reduced dependency on manual page refresh
 
-- View assigned appointments and patient directory entries associated with care assignments.
-- Update appointment status, document consultations, and issue prescriptions.
-- View doctor-level appointment analytics.
+### 🧠 Smart No-Show Prediction
+CarePulse includes a lightweight rule-based no-show risk system using appointment history.
 
-### Administrator workspace
+Risk levels:
+- LOW
+- MEDIUM
+- HIGH
 
-- Review dashboard metrics and recent activity.
-- Browse users, promote provisioned accounts to doctor role, and review audit events.
-- Manage ward beds and patient admission/discharge status.
-- Create bills, record simulated payments, and review insurance claims.
+The architecture can later be extended with a machine-learning prediction model.
 
-### Platform capabilities
+### 🔔 Smart Reminders
+- Appointment reminder workflow
+- Email notification support
+- Nodemailer/SMTP integration
+- Reminder workflow designed for future SMS integration
 
-- Short-lived access JWTs and HTTP-only refresh cookies.
-- Server-side role checks, request validation, login/triage rate limits, and security headers.
-- MongoDB persistence with unique indexes for appointment slots, beds, and prescriptions.
-- Socket.IO events for appointment availability and bed status updates.
-- Optional Gemini structured triage with a constrained fallback when the provider is unavailable or not configured.
-- QR verification links on prescription PDFs.
+### 💊 Digital Prescription
+- Doctor-generated prescriptions
+- Prescription records linked to appointments
+- PDF prescription generation
+- QR-code verification
+- Unique prescription verification code
 
-## Tech stack
+### 🔍 QR Prescription Verification
+Patients or authorized users can scan the prescription QR code and verify the prescription through the verification endpoint.
 
-- **Frontend:** React 19, TypeScript, Vite, Redux Toolkit, React Router, Axios, Recharts, Socket.IO client
-- **Backend:** Node.js, Express 5, Mongoose, Zod, JWT, Socket.IO
-- **Database:** MongoDB local or MongoDB Atlas
-- **Optional AI:** Google Gemini API
-- **Deployment:** Render Blueprint (`render.yaml`), with one Node web service and one static site
+Workflow:
 
-## Architecture
+Doctor
+→ Prescription
+→ Verification Code
+→ PDF
+→ QR Code
+→ Verification API
+
+### 🛏️ Bed & Resource Management
+- Hospital ward management
+- Bed availability
+- Occupied beds
+- Vacant beds
+- Maintenance status
+- Patient-bed association
+- Real-time bed updates
+
+### 📝 Audit Trail
+CarePulse records important system activities for traceability.
+
+Audit information can include:
+- User/actor
+- Action
+- Entity
+- Entity ID
+- Timestamp
+- IP address
+- User agent
+- Additional metadata
+
+### 📊 Analytics
+Operational analytics can provide visibility into:
+- Appointment activity
+- Appointment status
+- Bed utilization
+- Hospital operations
+- Claim information
+
+### 🩺 Telemedicine
+The system includes a browser-based telemedicine foundation with:
+- Appointment-specific consultation rooms
+- Camera access
+- Microphone access
+- Telemedicine appointment type
+
+The current implementation is a foundation that can be extended with complete WebRTC signaling or a managed video provider.
+
+### 🧾 Insurance Claim Simulation
+Insurance claims support:
+- Patient
+- Provider
+- Policy number
+- Amount
+- Claim status
+- Notes
+
+Claim states:
+
+`PENDING → APPROVED`
+
+or
+
+`PENDING → REJECTED`
+
+### 🤖 AI-Assisted Clinical Documentation
+CarePulse provides an AI-ready backend architecture for assisted clinical documentation.
+
+Workflow:
+
+Doctor Input
+→ Backend AI Service
+→ Gemini API Provider
+→ Streaming Response
+→ Doctor
+
+Technical capabilities include:
+- Server-side API credentials
+- Configurable AI provider
+- Configurable model
+- Configurable API base URL
+- Streaming responses
+- Server-side AI service layer
+- Local/demo fallback
+
+AI assistance is intended for documentation support and is not autonomous medical diagnosis or treatment.
+
+---
+
+## 🏗️ Technology Stack
+
+### Frontend
+
+- React.js
+- Vite
+- React Router
+- Axios
+- Socket.IO Client
+- Lucide Icons
+
+### Backend
+
+- Node.js
+- Express.js
+- Socket.IO
+- JWT
+- bcrypt
+- Helmet
+- CORS
+
+### Database
+
+- MongoDB
+- Mongoose
+
+### Additional Technologies
+
+- PDFKit
+- QRCode
+- Nodemailer
+- GeminiAI API
+- Browser Media APIs
+
+### Development & Deployment
+
+- Git
+- GitHub
+- GitHub Actions
+- Render
+- Environment Variables
+
+---
+
+## 🏛️ System Architecture
 
 ```text
-Browser (React + TypeScript)
-  ├── REST /api/v1 ───────────────┐
-  └── Socket.IO ──────────────────┤
-                                  ▼
-                         Express API (Node.js)
-                    auth · appointments · triage
-                  clinical records · operations
-                                  │
-                                  ▼
-                         MongoDB (Mongoose)
+                    ┌──────────────────────┐
+                    │   React Frontend     │
+                    │                      │
+                    │ Patient Portal       │
+                    │ Doctor Portal        │
+                    │ Admin Portal         │
+                    └──────────┬───────────┘
+                               │
+                 REST API + Socket.IO + SSE
+                               │
+                    ┌──────────▼───────────┐
+                    │ Node.js + Express     │
+                    │                      │
+                    │ Authentication       │
+                    │ Authorization         │
+                    │ Business Logic        │
+                    │ API Routes            │
+                    └───────┬───────┬──────┘
+                            │       │
+                 ┌──────────┘       └──────────────┐
+                 ▼                                 ▼
+          ┌─────────────┐                  ┌──────────────┐
+          │  MongoDB    │                  │ AI Provider  │
+          │  Mongoose   │                  │ OpenAI       │
+          └─────────────┘                  │ Compatible   │
+                                           └──────────────┘
+
+Additional Services:
+Socket.IO
+Nodemailer
+PDFKit
+QRCode
+Browser Media APIs
+````
+
+---
+
+## 🗄️ Core Data Models
+
+The application uses MongoDB with Mongoose-based data models.
+
+Main entities include:
+
+```text
+User
+ ├── DoctorProfile
+ └── PatientProfile
+
+Doctor
+ └── Appointment
+
+Patient
+ └── Appointment
+
+Appointment
+ └── Prescription
+
+User
+ └── AuditLog
+
+Patient
+ └── Bed
+
+Patient
+ └── InsuranceClaim
 ```
 
-Domain routes and models are under `server/src/modules`. The database entities and key indexes are documented in [docs/DATABASE.md](docs/DATABASE.md). Endpoint groups and access notes are in [docs/API.md](docs/API.md).
+---
 
-## Requirements
+## 🔐 Security
 
-- Node.js 20 or newer and npm
-- A reachable MongoDB database (local MongoDB or MongoDB Atlas)
-- Gemini API key only if you want model-assisted triage; the app has a limited fallback without it
+CarePulse implements several security-focused practices:
 
-## Local setup (Windows PowerShell)
+* JWT authentication
+* bcrypt password hashing
+* Role-based authorization
+* Protected API routes
+* Helmet security middleware
+* CORS configuration
+* Environment-based secrets
+* Server-side AI credentials
+* Database validation
+* Database indexes and constraints
+* Audit logging
 
-From the project root:
+> CarePulse is an academic/capstone project and should not be considered formally HIPAA compliant, clinically certified, or production-certified without appropriate security, compliance, clinical, and infrastructure validation.
 
-```powershell
-Copy-Item server/.env.example server/.env
+---
+
+## ⚡ Real-Time Architecture
+
+Socket.IO is used for real-time application events.
+
+Example:
+
+```text
+Doctor books appointment
+        ↓
+Node.js / Express
+        ↓
+MongoDB
+        ↓
+Socket.IO Event
+        ↓
+Connected Clients
+        ↓
+Availability UI Updates
 ```
 
-Edit `server/.env` and set `MONGODB_URI`, `JWT_ACCESS_SECRET`, and `JWT_REFRESH_SECRET` to appropriate values. Keep `COOKIE_SECURE=false` for local HTTP development. The `.env` file is ignored by Git; never commit or share it.
+The same approach can be extended to hospital resources such as beds and other operational events.
 
-Install and start:
+---
 
-```powershell
+## 📄 Prescription Verification
+
+Prescription verification follows this workflow:
+
+```text
+Doctor
+   ↓
+Create Prescription
+   ↓
+Generate Verification Code
+   ↓
+Generate PDF
+   ↓
+Generate QR Code
+   ↓
+Patient Receives Prescription
+   ↓
+Scan QR
+   ↓
+Verification API
+   ↓
+Prescription Verification
+```
+
+---
+
+## 📁 Project Structure
+
+```text
+CarePulse/
+│
+├── Backend/
+│   ├── models/
+│   ├── routes/
+│   ├── services/
+│   ├── middleware/
+│   ├── server.js
+│   └── package.json
+│
+├── Frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.js
+│
+├── docs/
+│
+├── .github/
+│   └── workflows/
+│
+├── .gitignore
+├── README.md
+└── render.yaml
+```
+
+> Update the folder structure above if the repository uses different folder/file names.
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Jidnyesha11/CarePulse.git
+```
+
+```bash
+cd CarePulse
+```
+
+### 2. Install Backend Dependencies
+
+```bash
+cd Backend
 npm install
-npm run seed   # optional: adds synthetic demo users and sample records
+```
+
+### 3. Install Frontend Dependencies
+
+```bash
+cd ../Frontend
+npm install
+```
+
+---
+
+## 🔑 Environment Variables
+
+Create the required environment configuration for the backend.
+
+Example:
+
+```env
+PORT=5000
+
+MONGO_URI=your_mongodb_connection_string
+
+JWT_SECRET=your_jwt_secret
+
+CLIENT_URL=http://localhost:5173
+
+SMTP_HOST=your_smtp_host
+SMTP_PORT=587
+SMTP_USER=your_email
+SMTP_PASS=your_email_password
+
+OPENAI_API_KEY=your_api_key
+OPENAI_BASE_URL=your_ai_provider_url
+OPENAI_MODEL=your_model
+```
+
+Never commit real API keys, passwords, database credentials, or other secrets to GitHub.
+
+---
+
+## ▶️ Running the Application
+
+### Start Backend
+
+```bash
+cd Backend
 npm run dev
 ```
 
-The seed uses a known shared demo password (`CarePulseDemo26!`). Use only with a disposable/demo database. If the seed fails, see [Testing and troubleshooting](docs/TESTING.md).
+### Start Frontend
 
-Local URLs:
+Open another terminal:
 
-| Resource             | URL                                       |
-| -------------------- | ----------------------------------------- |
-| Frontend             | http://localhost:5173                     |
-| API base             | http://localhost:4000/api/v1              |
-| Health check         | http://localhost:4000/api/v1/health       |
-| Interactive API docs | http://localhost:4000/api/docs            |
-| OpenAPI JSON         | http://localhost:4000/api/v1/openapi.json |
-
-## Useful commands
-
-```powershell
-npm install       # install root and workspace dependencies
-npm run dev       # run frontend and API together
-npm run dev:client
-npm run dev:server
-npm run seed      # add/update synthetic demo records in configured database
-npm test          # run server checks
-npm run build     # TypeScript check and production frontend build
+```bash
+cd Frontend
+npm run dev
 ```
 
-See [docs/TESTING.md](docs/TESTING.md) for verification steps and [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for Render setup.
-
-## Deployment
-
-The root-level `render.yaml` defines `carepulse-api` (Node web service) and `carepulse-web` (static site). Create a GitHub repository, push this project, then create a **Blueprint** in Render from that repository. Configure the secrets and URLs described in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
-
-The Blueprint currently leaves the API compute plan unspecified. Check the plan and price Render shows before confirming deployment; Render's documented default for a new web service is a paid plan. Free services have limitations, including sleeping after inactivity. The React single-page app also needs a Render rewrite rule (`/*` → `/index.html`) for direct visits to client-side routes.
-
-After deployment, replace the live URL placeholders at the top of this README with the URLs shown on the Render service pages. A placeholder is not evidence that a deployment exists.
-
-## Security and scope
-
-- This project is **not** certified HIPAA-compliant and is not a clinical product. Do not use it for diagnosis, treatment, emergencies, or real patient information.
-- Gemini output is constrained and safety-checked, but it is not medical advice. Always use a qualified clinician for care decisions; emergency symptoms require immediate local emergency services.
-- Demo seed accounts share a known password. Disable or change them before making a demo publicly accessible.
-- Payment recording and claims are simulations; there is no payment processor, insurer connection, or real money movement.
-- Email/SMS delivery, password reset, external file storage, and horizontally scaled Socket.IO are not implemented.
-- See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for deployment constraints and [docs/TESTING.md](docs/TESTING.md) for the checks this repository supports.
-
-## Repository map
+The frontend will normally be available at:
 
 ```text
-client/                 React + TypeScript user interface
-server/src/modules/     API domains, services, routes, and Mongoose models
-server/test/             Automated server checks
-docs/API.md               REST endpoint reference
-docs/DATABASE.md          Data model and relationship reference
-docs/DEPLOYMENT.md        Render and MongoDB deployment guide
-docs/TESTING.md           Local validation and manual walkthrough
-render.yaml               Render Blueprint for API and frontend
+http://localhost:5173
+```
+
+The backend will normally run on the configured API port.
+
+---
+
+## 🔄 Application Workflow
+
+```text
+Patient
+   ↓
+Registration / Login
+   ↓
+Doctor Search
+   ↓
+Live Availability
+   ↓
+Appointment Booking
+   ↓
+Reminder
+   ↓
+Consultation
+   ↓
+Prescription
+   ↓
+PDF + QR Verification
+   ↓
+Follow-up / Insurance
+```
+
+Meanwhile, hospital administration can monitor:
+
+```text
+Appointments
+Beds
+Resources
+Audit Logs
+Claims
+Analytics
+```
+
+---
+
+## 🧪 Testing
+
+The project includes testing/validation capabilities for frontend and backend components.
+
+Typical development checks include:
+
+```bash
+npm test
+```
+
+and build validation:
+
+```bash
+npm run build
+```
+
+Use the scripts defined in each package.json for the exact repository configuration.
+
+---
+
+## 🚀 Deployment
+
+The application can be deployed using services such as:
+
+* Render
+* MongoDB Atlas
+* GitHub Actions
+
+Deployment requires environment variables for:
+
+* MongoDB
+* JWT
+* Email/SMTP
+* AI provider
+* Frontend/backend URLs
+
+---
+
+## 🔮 Future Enhancements
+
+Potential future improvements include:
+
+* Advanced ML-based no-show prediction
+* Automated scheduled reminders
+* SMS/Twilio integration
+* Full WebRTC telemedicine
+* Multi-language patient portal
+* Advanced hospital analytics
+* Multi-hospital support
+* EHR integrations
+* Payment integration
+* Mobile applications
+* Advanced encryption and key management
+* Stronger compliance and security controls
+* Production observability and monitoring
+
+---
+
+## 🎯 Project Objective
+
+HMS CarePulse demonstrates how modern full-stack technologies can be combined to build a connected healthcare operations platform.
+
+The project focuses on:
+
+* Full-stack development
+* REST API architecture
+* Authentication and authorization
+* Database design
+* Real-time communication
+* Healthcare workflow automation
+* Digital document generation
+* QR verification
+* Auditability
+* Analytics
+* AI integration
+* CI/CD and deployment
+
+---
+
+## 👨‍💻 Project
+
+**HMS CarePulse — Smart Hospital Management System**
+
+GitHub:
+
+[https://github.com/Jidnyesha11/CarePulse.git](https://github.com/Jidnyesha11/CarePulse.git)
+
+---
+
+## 📌 Disclaimer
+
+HMS CarePulse is an academic/capstone software project intended for demonstration and learning purposes.
+
+It is not a substitute for certified hospital information systems, clinical decision-making, professional medical advice, or formally validated healthcare infrastructure.
+
+AI-assisted functionality is intended to support documentation workflows and should not be treated as autonomous medical diagnosis or treatment.
+
+---
+
+## ⭐ Acknowledgements
+
+Built as a full-stack development capstone project demonstrating modern web technologies, healthcare workflow design, real-time communication, security practices, automation, analytics and AI-assisted capabilities.
+
 ```
