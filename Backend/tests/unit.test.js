@@ -1,1 +1,0 @@
-const test=require("node:test"),assert=require("node:assert/strict");test("risk rules",()=>{const risk=(t,m)=>!t||m/t<.25?"low":m/t<.5?"medium":"high";assert.equal(risk(0,0),"low");assert.equal(risk(4,1),"medium");assert.equal(risk(5,3),"high")});

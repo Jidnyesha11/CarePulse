@@ -1,0 +1,11 @@
+node_modules
+dist
+build
+coverage
+server/node_modules
+client/node_modules
+.env
+.env.*
+uploads
+*.min.js
+*.min.css
